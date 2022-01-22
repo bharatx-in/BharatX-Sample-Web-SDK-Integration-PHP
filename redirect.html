@@ -1,0 +1,61 @@
+<html>
+    <head>
+        <title>BharatX | Web SDK | Sample Integration | PHP</title>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+        <script src="https://web.bharatx.tech/sdk.js"></script>
+    </head>
+    <body>
+        <form id="txn-form">
+            <label for="name">Name: </label>
+            <input id="name" type="text" name="name"/> </br>
+            <label for="phone">Phone Number without country code: </label>
+            <input id="phone" type="text" name="phone"/> </br>
+            <label for="email">Email: </label>
+            <input id="email" type="email" name="email" /> </br>
+            <label for="amount">Amount in paise: </label>
+            <input id="amount" type="number" name="amount"/>
+            <button type="button" id="bx-button">Start Transaction</button>
+        </form>
+
+        <script>
+            $('#txn-form').submit(function(e){
+                e.preventDefault();
+                
+            });
+
+            async function getTxnId() {
+                return new Promise((resolve, reject) => {
+                    $.ajax({
+                        url: '/start-transaction.php',
+                        type: 'post',
+                        data:$('#txn-form').serialize(),
+                        success:function(data){
+                            resolve(data.merchant_txn_id);
+                        },
+                        error: function(jq, txt, err) {
+                            reject(err);
+                        },
+                    });
+                });
+            }
+
+            const partnerId = "testPartnerId";
+            const amountInPaise = 300*100;
+            const phoneNumber = "+911234567890";
+
+            $("#bx-button").on("click", (e) => {
+                initiateBharatXTransaction({
+                    type: "redirect",
+                    getTransactionId: getTxnId,
+                    partnerId,
+                    amount: Number.parseInt($("#amount").val()),
+                    phoneNumber: "+91" + $("#phone").val(),
+                    redirectUrl: "https://bharatx.tech/payment-status/?mode=TEST",
+                    redirectFailureCallback: (status) => {
+                        alert("TRANSACTION FAILED: " + status);
+                    },
+                });
+            });
+        </script>
+    </body>
+</html>
